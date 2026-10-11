@@ -6,7 +6,7 @@ use winit::event_loop::{ActiveEventLoop, EventLoop};
 use winit::window::WindowId;
 
 use crate::platform::Platform;
-use crate::renderer::Renderer;
+use crate::render::Renderer;
 
 struct State {
     renderer: Renderer,
@@ -23,17 +23,26 @@ impl ApplicationHandler for App {
             return;
         }
 
-        match Platform::new(event_loop) {
-            Ok(platform) => {
-                let renderer = Renderer::new(platform.gl.clone());
-                platform.window.request_redraw();
-                self.state = Some(State { renderer, platform });
-            }
+        let platform = match Platform::new(event_loop) {
+            Ok(platform) => platform,
             Err(e) => {
-                eprintln!("Initialization error: {e}");
+                eprintln!("Window initialization error: {e}");
                 event_loop.exit();
+                return;
             }
-        }
+        };
+
+        let renderer = match Renderer::new(platform.gl.clone()) {
+            Ok(renderer) => renderer,
+            Err(e) => {
+                eprintln!("Render initialization error: {e}");
+                event_loop.exit();
+                return;
+            }
+        };
+
+        platform.window.request_redraw();
+        self.state = Some(State { renderer, platform });
     }
 
     fn window_event(&mut self, event_loop: &ActiveEventLoop, _id: WindowId, event: WindowEvent) {

@@ -1,6 +1,6 @@
 mod app;
 mod platform;
-mod renderer;
+mod render;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     app::run()
