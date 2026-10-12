@@ -1,4 +1,5 @@
 mod mesh;
+mod overlay;
 mod renderer;
 mod shader;
 

@@ -5,6 +5,7 @@ use glam::{Mat4, Vec3};
 use glow::HasContext;
 
 use super::mesh::Mesh;
+use super::overlay::{FpsCounter, Overlay};
 use super::shader::Program;
 
 #[rustfmt::skip]
@@ -34,6 +35,8 @@ pub struct Renderer {
     program: Program,
     cube: Mesh,
     start: Instant,
+    overlay: Overlay,
+    fps: FpsCounter,
 }
 
 impl Renderer {
@@ -50,15 +53,19 @@ impl Renderer {
             gl.enable(glow::CULL_FACE);
         }
 
+        let overlay = Overlay::new(gl.clone())?;
+
         Ok(Self {
             gl,
             program,
             cube,
             start: Instant::now(),
+            overlay,
+            fps: FpsCounter::new(),
         })
     }
 
-    pub fn render(&self, width: u32, height: u32) {
+    pub fn render(&mut self, width: u32, height: u32) {
         if width == 0 || height == 0 {
             return;
         }
@@ -85,5 +92,7 @@ impl Renderer {
         self.program.set_mat4("u_projection", &projection);
 
         self.cube.draw();
+        self.fps.tick();
+        self.overlay.draw_number(self.fps.fps, width, height);
     }
 }

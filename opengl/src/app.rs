@@ -46,7 +46,7 @@ impl ApplicationHandler for App {
     }
 
     fn window_event(&mut self, event_loop: &ActiveEventLoop, _id: WindowId, event: WindowEvent) {
-        let Some(state) = &self.state else { return };
+        let Some(state) = &mut self.state else { return };
 
         match event {
             WindowEvent::CloseRequested => event_loop.exit(),

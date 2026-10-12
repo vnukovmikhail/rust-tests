@@ -68,6 +68,9 @@ impl Platform {
         {
             eprintln!("failed to enable vsync: {e}");
         }
+        /*if let Err(e) = surface.set_swap_interval(&context, SwapInterval::DontWait) {
+            eprintln!("failed to enable vsync: {e}");
+        }*/
 
         unsafe {
             println!("GL version:  {}", gl.get_parameter_string(glow::VERSION));
