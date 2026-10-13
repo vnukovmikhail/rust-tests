@@ -13,6 +13,7 @@ use glutin::surface::{GlSurface, Surface, SwapInterval, WindowSurface};
 use glutin_winit::{DisplayBuilder, GlWindow};
 use winit::event_loop::ActiveEventLoop;
 use winit::raw_window_handle::HasWindowHandle;
+use winit::window::CursorGrabMode;
 use winit::window::Window;
 
 pub struct Platform {
@@ -108,6 +109,20 @@ impl Platform {
         self.window.pre_present_notify();
         if let Err(e) = self.surface.swap_buffers(&self.context) {
             eprintln!("swap_buffers: {e}");
+        }
+    }
+
+    pub fn set_cursor_captured(&self, captured: bool) {
+        if captured {
+            if self.window.set_cursor_grab(CursorGrabMode::Locked).is_err() {
+                if let Err(e) = self.window.set_cursor_grab(CursorGrabMode::Confined) {
+                    eprintln!("cursor grab: {e}");
+                }
+            }
+            self.window.set_cursor_visible(false);
+        } else {
+            let _ = self.window.set_cursor_grab(CursorGrabMode::None);
+            self.window.set_cursor_visible(true);
         }
     }
 }

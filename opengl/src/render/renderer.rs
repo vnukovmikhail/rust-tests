@@ -4,6 +4,8 @@ use std::time::Instant;
 use glam::{Mat4, Vec3};
 use glow::HasContext;
 
+use crate::render::{Camera, Input};
+
 use super::mesh::Mesh;
 use super::overlay::{FpsCounter, Overlay};
 use super::shader::Program;
@@ -37,6 +39,8 @@ pub struct Renderer {
     start: Instant,
     overlay: Overlay,
     fps: FpsCounter,
+    camera: Camera,
+    last_frame: Instant,
 }
 
 impl Renderer {
@@ -62,13 +66,24 @@ impl Renderer {
             start: Instant::now(),
             overlay,
             fps: FpsCounter::new(),
+            camera: Camera::new(Vec3::new(0.0, 0.0, 6.0)),
+            last_frame: Instant::now(),
         })
     }
 
-    pub fn render(&mut self, width: u32, height: u32) {
+    pub fn look(&mut self, dx: f32, dy: f32) {
+        self.camera.rotate(dx, dy);
+    }
+
+    pub fn render(&mut self, width: u32, height: u32, input: &Input) {
         if width == 0 || height == 0 {
             return;
         }
+
+        let now = Instant::now();
+        let dt = (now - self.last_frame).as_secs_f32();
+        self.last_frame = now;
+        self.camera.update(input, dt);
 
         unsafe {
             self.gl.viewport(0, 0, width as i32, height as i32);
@@ -80,8 +95,9 @@ impl Renderer {
         let time = self.start.elapsed().as_secs_f32();
 
         let model = Mat4::from_rotation_y(time) * Mat4::from_rotation_x(time * 0.5);
-        let view =
-            glam::camera::rh::view::look_at_mat4(Vec3::new(0.0, 0.0, 6.0), Vec3::ZERO, Vec3::Y);
+        let view = self.camera.view();
+        // let view =
+        //     glam::camera::rh::view::look_at_mat4(Vec3::new(0.0, 0.0, 6.0), Vec3::ZERO, Vec3::Y);
         let aspect = width as f32 / height as f32;
         let projection =
             glam::camera::rh::proj::opengl::perspective(45.0_f32.to_radians(), aspect, 0.1, 100.0);
