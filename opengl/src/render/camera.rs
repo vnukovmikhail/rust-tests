@@ -2,9 +2,9 @@ use glam::{Mat4, Vec3};
 
 pub struct Camera {
     pub position: Vec3,
-    pub yaw: f32, // радианы, 0 = смотрим вдоль -Z
+    pub yaw: f32,
     pub pitch: f32,
-    pub speed: f32, // единиц в секунду
+    pub speed: f32,
 }
 
 #[derive(Default)]
@@ -38,7 +38,6 @@ impl Camera {
     }
 
     pub fn update(&mut self, input: &Input, dt: f32) {
-        // движение по горизонтали, без учёта наклона вверх/вниз
         let flat_forward = Vec3::new(self.yaw.sin(), 0.0, -self.yaw.cos());
         let right = flat_forward.cross(Vec3::Y);
 
