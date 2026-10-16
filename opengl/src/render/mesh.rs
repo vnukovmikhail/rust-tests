@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 use glow::HasContext;
 
-const FLOATS_PER_VERTEX: usize = 6;
+const FLOATS_PER_VERTEX: usize = 5;
 
 pub struct Mesh {
     gl: Rc<glow::Context>,
@@ -44,7 +44,7 @@ impl Mesh {
             gl.enable_vertex_attrib_array(1);
             gl.vertex_attrib_pointer_f32(
                 1,
-                3,
+                2,
                 glow::FLOAT,
                 false,
                 stride,

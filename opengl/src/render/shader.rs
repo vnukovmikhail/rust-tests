@@ -74,6 +74,13 @@ impl Program {
                 .uniform_matrix_4_f32_slice(location.as_ref(), false, &value.to_cols_array());
         }
     }
+
+    pub fn set_i32(&self, name: &str, value: i32) {
+        unsafe {
+            let location = self.gl.get_uniform_location(self.raw, name);
+            self.gl.uniform_1_i32(location.as_ref(), value);
+        }
+    }
 }
 
 impl Drop for Program {

@@ -92,8 +92,6 @@ impl ApplicationHandler for App {
                 }
             }
 
-            WindowEvent::Focused(false) => state.input = Input::default(),
-
             WindowEvent::RedrawRequested => {
                 let (width, height) = state.platform.size();
                 state.renderer.render(width, height, &state.input);

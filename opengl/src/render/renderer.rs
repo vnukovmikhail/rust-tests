@@ -9,27 +9,49 @@ use crate::render::{Camera, Input};
 use super::mesh::Mesh;
 use super::overlay::{FpsCounter, Overlay};
 use super::shader::Program;
+use super::texture::Texture;
 
 #[rustfmt::skip]
-const CUBE_VERTICES: [f32; 48] = [
-    -0.5, -0.5,  0.5,   1.0, 0.0, 0.0,
-     0.5, -0.5,  0.5,   0.0, 1.0, 0.0,
-     0.5,  0.5,  0.5,   0.0, 0.0, 1.0,
-    -0.5,  0.5,  0.5,   1.0, 1.0, 0.0,
-    -0.5, -0.5, -0.5,   1.0, 0.0, 1.0,
-     0.5, -0.5, -0.5,   0.0, 1.0, 1.0,
-     0.5,  0.5, -0.5,   1.0, 1.0, 1.0,
-    -0.5,  0.5, -0.5,   0.5, 0.5, 0.5,
+const CUBE_VERTICES: [f32; 120] = [
+    -0.5, -0.5,  0.5,  0.0, 0.0,
+     0.5, -0.5,  0.5,  1.0, 0.0,
+     0.5,  0.5,  0.5,  1.0, 1.0,
+    -0.5,  0.5,  0.5,  0.0, 1.0,
+    
+     0.5, -0.5, -0.5,  0.0, 0.0,
+    -0.5, -0.5, -0.5,  1.0, 0.0,
+    -0.5,  0.5, -0.5,  1.0, 1.0,
+     0.5,  0.5, -0.5,  0.0, 1.0,
+    
+     0.5, -0.5,  0.5,  0.0, 0.0,
+     0.5, -0.5, -0.5,  1.0, 0.0,
+     0.5,  0.5, -0.5,  1.0, 1.0,
+     0.5,  0.5,  0.5,  0.0, 1.0,
+    
+    -0.5, -0.5, -0.5,  0.0, 0.0,
+    -0.5, -0.5,  0.5,  1.0, 0.0,
+    -0.5,  0.5,  0.5,  1.0, 1.0,
+    -0.5,  0.5, -0.5,  0.0, 1.0,
+    
+    -0.5,  0.5,  0.5,  0.0, 0.0,
+     0.5,  0.5,  0.5,  1.0, 0.0,
+     0.5,  0.5, -0.5,  1.0, 1.0,
+    -0.5,  0.5, -0.5,  0.0, 1.0,
+    
+    -0.5, -0.5, -0.5,  0.0, 0.0,
+     0.5, -0.5, -0.5,  1.0, 0.0,
+     0.5, -0.5,  0.5,  1.0, 1.0,
+    -0.5, -0.5,  0.5,  0.0, 1.0,
 ];
 
 #[rustfmt::skip]
 const CUBE_INDICES: [u32; 36] = [
-    0, 1, 2,  2, 3, 0,
-    5, 4, 7,  7, 6, 5,
-    1, 5, 6,  6, 2, 1,
-    4, 0, 3,  3, 7, 4,
-    3, 2, 6,  6, 7, 3,
-    4, 5, 1,  1, 0, 4,
+     0,  1,  2,   2,  3,  0,
+     4,  5,  6,   6,  7,  4,
+     8,  9, 10,  10, 11,  8,
+    12, 13, 14,  14, 15, 12,
+    16, 17, 18,  18, 19, 16,
+    20, 21, 22,  22, 23, 20,
 ];
 
 pub struct Renderer {
@@ -41,6 +63,7 @@ pub struct Renderer {
     fps: FpsCounter,
     camera: Camera,
     last_frame: Instant,
+    texture: Texture,
 }
 
 impl Renderer {
@@ -59,6 +82,8 @@ impl Renderer {
 
         let overlay = Overlay::new(gl.clone())?;
 
+        let texture = Texture::from_png(gl.clone(), include_bytes!("../../assets/block.png"))?;
+
         Ok(Self {
             gl,
             program,
@@ -68,6 +93,7 @@ impl Renderer {
             fps: FpsCounter::new(),
             camera: Camera::new(Vec3::new(0.0, 0.0, 6.0)),
             last_frame: Instant::now(),
+            texture,
         })
     }
 
@@ -103,6 +129,10 @@ impl Renderer {
             glam::camera::rh::proj::opengl::perspective(45.0_f32.to_radians(), aspect, 0.1, 100.0);
 
         self.program.bind();
+
+        self.texture.bind(0);
+        self.program.set_i32("u_texture", 0);
+
         self.program.set_mat4("u_model", &model);
         self.program.set_mat4("u_view", &view);
         self.program.set_mat4("u_projection", &projection);
