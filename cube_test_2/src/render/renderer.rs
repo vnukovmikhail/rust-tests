@@ -42,7 +42,7 @@ impl Renderer {
 
         let texture = Texture::from_png(gl.clone(), include_bytes!("../../assets/debug.png"))?;
 
-        let mut world = World::new();
+        let mut world = World::default();
         world.generate(6, 4, 6);
 
         let mut meshes = HashMap::new();

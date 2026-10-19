@@ -5,8 +5,6 @@ use noise::{Fbm, MultiFractal, NoiseFn, OpenSimplex};
 
 pub type ChunkPos = (i32, i32, i32);
 
-const SEED: u32 = 1337;
-
 type Noise = Fbm<OpenSimplex>;
 
 fn make_noise(seed: u32, frequency: f64, octaves: usize) -> Noise {
@@ -17,21 +15,30 @@ fn make_noise(seed: u32, frequency: f64, octaves: usize) -> Noise {
 
 pub struct World {
     chunks: HashMap<ChunkPos, Chunk>,
+    seed: u32,
+}
+
+impl Default for World {
+    fn default() -> Self {
+        let seed = rand::random::<u32>();
+        Self::new(seed)
+    }
 }
 
 impl World {
-    pub fn new() -> Self {
+    pub fn new(seed: u32) -> Self {
         Self {
             chunks: HashMap::new(),
+            seed,
         }
     }
 
     pub fn generate(&mut self, nx: i32, ny: i32, nz: i32) {
         let cs = CS as i32;
         let world_h = (ny * cs) as f32;
-        let terrain = make_noise(SEED, 0.010, 4);
-        let cave_a = make_noise(SEED + 1, 0.020, 2);
-        let cave_b = make_noise(SEED + 2, 0.020, 2);
+        let terrain = make_noise(self.seed, 0.010, 4);
+        let cave_a = make_noise(self.seed + 1, 0.020, 2);
+        let cave_b = make_noise(self.seed + 2, 0.020, 2);
 
         for cx in 0..nx {
             for cz in 0..nz {
